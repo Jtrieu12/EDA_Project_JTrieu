@@ -1,0 +1,155 @@
+from google.colab import drive
+drive.mount('/content/drive')
+import numpy as np
+import pandas as pd 
+import matplotlib.pyplot as plt 
+
+data_2018 = pd.read_csv('/content/drive/MyDrive/yearly - actual dataset/2018.csv')
+data_2019 = pd.read_csv('/content/drive/MyDrive/yearly - actual dataset/2019.csv')
+
+frame2018 = pd.DataFrame(data_2018, columns=["Player","Pos","Age","G","FantasyPoints"])
+frame2018.set_index("Player", inplace=True)
+
+frame = pd.DataFrame(data_2019, columns=["Player","Pos","Age","G","FantasyPoints"])
+frame.set_index("Player", inplace=True)
+
+#Create the ppg calculation 
+frame["ppg"] = frame["FantasyPoints"] / frame["G"]
+frame2018["ppg"] = frame2018["FantasyPoints"] / frame2018["G"]
+
+
+top50 = frame.head(50)
+top50_2018 = frame2018.head(50)
+
+
+#this is positional data for 2019
+top50 = top50.sort_values(by=["ppg"], ascending=False)
+runningbacks = top50[top50["Pos"] == "RB"]
+quarterbacks = top50[top50["Pos"] == "QB"]
+tightends = top50[top50["Pos"] == "TE"]
+widerecievers = top50[top50["Pos"] == "WR"]
+
+# positional data for 2018 
+top50_2018 = top50_2018.sort_values(by=["ppg"], ascending=False)
+runningbacks2018 = top50_2018[top50_2018["Pos"] == "RB"]
+quarterbacks2018 = top50_2018[top50_2018["Pos"] == "QB"]
+tightends2018 = top50_2018[top50_2018["Pos"] == "TE"]
+widerecievers2018 = top50_2018[top50_2018["Pos"] == "WR"]
+
+
+indexer = ["Age", "ppg"]
+indexer2 = ["Pos", "ppg"]
+
+age_ppg_2018 = top50_2018.groupby(["Age"])[indexer].mean()
+age_ppg_frame_2018 = pd.DataFrame(age_ppg_2018, columns= ["Age", "ppg"])
+age_ppg_frame_2018.set_index("Age", inplace=True)
+
+
+age_ppg_2019 = top50.groupby(["Age"])[indexer].mean()
+age_ppg_frame_2019 = pd.DataFrame(age_ppg_2019, columns= ["Age", "ppg"])
+age_ppg_frame_2019.set_index("Age", inplace=True)
+
+ppg_pos_2018 = top50_2018.groupby(["Pos"])[indexer2].mean()
+frame_2018 = pd.DataFrame(ppg_pos_2018, columns= ["Pos", "ppg"])
+
+ppg_pos_2019 = top50.groupby(["Pos"])[indexer2].mean()
+frame_2019 = pd.DataFrame(ppg_pos_2019, columns= ["Pos", "ppg"])
+
+
+
+#for the distribution of positions
+plt.subplot(1,2,1)
+plt.hist(top50_2018["Pos"],)
+plt.axis([-1,4,0,25])
+plt.ylabel("Number of Players")
+plt.title("Positional Data 2018")
+plt.grid()
+plt.subplot(1,2,2)
+plt.hist(top50["Pos"])
+plt.axis([-1,4,0,25])
+plt.title("Positional Data 2019")
+plt.grid()
+plt.show()
+
+#average points per position in 2018, with hard-coded numbers 
+pos = ["QB", "RB","TE","WR"]
+pos_ppg_2018 = [21.13,17.62,15.58,18.02]
+plt.title("Average Points Per Position 2018")
+plt.ylabel("Points per Game")
+plt.bar(pos,pos_ppg_2018)
+plt.grid()
+plt.show()
+
+#for 2019
+pos_ppg_2019 = [20.55,17.19,14.31,16.64]
+plt.title("Average Points Per Position 2019")
+plt.ylabel("Points Per Game")
+plt.bar(pos,pos_ppg_2019)
+plt.grid()
+plt.show()
+
+#2018 ppg / age 
+age_2018 = [21,22,23,24,25,26,27,28,29,30,31,33,35,36]
+ppg_age_2018 = [23.99,18.60,20.10,16.38,16.87,17.95,15.29,18.30,19.02,21.58,12.10,16.87,19.16,20.87]
+plt.title("Points Per Game based on Age 2018")
+plt.ylabel("Points Per Game")
+plt.xlabel("Age")
+plt.bar(age_2018,ppg_age_2018)
+plt.grid()
+plt.show()
+
+#QB points per game by age 
+plt.scatter(quarterbacks2018["Age"],quarterbacks2018["ppg"],marker='s', color ='b',label="2018")
+plt.scatter(quarterbacks["Age"],quarterbacks["ppg"],marker='o',color='r',label="2019")
+plt.title("Quarterbacks Points Per Game by Age")
+plt.ylabel("Points Per Game")
+plt.xlabel("Age")
+plt.axis([20,37,10,30])
+plt.legend()
+plt.grid()
+plt.show()
+
+#TE points per game by age
+plt.scatter(tightends2018["Age"],tightends2018["ppg"],marker='s', color ='b',label="2018")
+plt.scatter(tightends["Age"],tightends["ppg"],marker='o',color='r',label="2019")
+plt.title("Tight Ends Points Per Game by Age")
+plt.ylabel("Points Per Game")
+plt.xlabel("Age")
+plt.axis([20,35,10,30])
+plt.legend()
+plt.grid()
+plt.show()
+
+
+#WR points per game by age 
+plt.scatter(widerecievers2018["Age"],widerecievers2018["ppg"],marker='s', color ='b',label="2018")
+plt.scatter(widerecievers["Age"],widerecievers["ppg"],marker='o',color='r',label="2019")
+plt.title("Wide Recievers Points Per Game by Age")
+plt.ylabel("Points Per Game")
+plt.xlabel("Age")
+plt.axis([20,35,10,30])
+plt.grid()
+plt.legend()
+plt.show()
+
+#count how many items for blogpost
+c = len(widerecievers[widerecievers["Age"]==26]) + len(widerecievers2018[widerecievers2018["Age"]==26])
+d = len(widerecievers2018) + len(widerecievers)
+
+
+#runningbacks points per game by age
+plt.scatter(runningbacks["Age"],runningbacks["ppg"], marker='o',color='r',label="2019")
+plt.scatter(runningbacks2018["Age"],runningbacks2018["ppg"], marker='s', color ='b',label="2018")
+plt.title("Running Backs Points Per Game by Age")
+plt.ylabel("Points Per Game")
+plt.xlabel("Age")
+plt.axis([20,35,10,35])
+plt.grid()
+plt.legend()
+plt.show()
+
+#counter for the blog insights 
+c = len(runningbacks[runningbacks["Age"]<26]) + len(runningbacks2018[runningbacks2018["Age"]<26])
+d = len(runningbacks) + len(runningbacks2018)
+
+
